@@ -1,0 +1,462 @@
+{% comment %}
+  Best Selling – Mixed Collections
+  Full Card Click (JS) + Safe Add to Cart
+{% endcomment %}
+
+<section class="best-selling-anime-section">
+  <div class="page-width">
+
+    <h2 class="best-selling-title">⚡Best sellers⚡</h2>
+
+    <div
+      class="best-selling-grid"
+      id="anime-mixed-grid"
+      data-desktop-limit="{{ section.settings.desktop_limit }}"
+      data-mobile-limit="{{ section.settings.mobile_limit }}"
+    >
+
+      {% for block in section.blocks %}
+        {% assign col = collections[block.settings.collection] %}
+        {% if col %}
+          {% for product in col.products %}
+              <div
+                class="anime-card best-selling-card"
+                data-url="{{ product.url }}"
+                data-collection="{{ col.handle }}"
+              >
+
+                <!-- IMAGE -->
+                <div class="anime-card__image">
+                 {% assign in_stock = false %}
+{% for v in product.variants %}
+  {% if v.available %}
+    {% assign in_stock = true %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% if product.available == false %}
+  <span class="anime-badge sold-out">Sold Out</span>
+
+{% elsif in_stock and product.compare_at_price > product.price %}
+  <span class="anime-badge sale">Sale</span>
+{% endif %}
+
+                  <img
+                    src="{{ product.featured_image | image_url: width: 600 }}"
+                    alt="{{ product.title }}"
+                    loading="lazy">
+                </div>
+
+                <!-- CONTENT -->
+                <div class="anime-card__content">
+
+                  <div class="anime-card__body">
+                    <div class="anime-title">{{ product.title }}</div>
+
+                    {% if product.tags.size > 0 %}
+                      <div class="anime-pills">
+                        {% for tag in product.tags limit: 4 %}
+                          <span>{{ tag }}</span>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+
+                    {%- assign base = product.id | modulo: 11 -%}
+{%- assign rating = base | times: 0.1 | plus: 4.0 -%}
+{%- assign rating_display = rating | round: 1 -%}
+
+<div class="anime-rating" data-value="{{ rating_display }}"></div>
+
+
+                    {% if product.compare_at_price > product.price %}
+                      <div class="anime-price-row">
+                        <span class="anime-discount">
+                          {{ product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price }}% OFF
+                        </span>
+                        <span class="anime-compare">
+                          Rs. {{ product.compare_at_price | money_without_currency }}
+                        </span>
+                      </div>
+                    {% endif %}
+
+                    <div class="anime-final-price">
+                      Rs. {{ product.price | money_without_currency }}
+                    </div>
+                  </div>
+
+                  <!-- FOOTER -->
+                  <div class="anime-card__footer">
+                    <button
+  class="anime-btn js-add-to-cart"
+  data-variant="{{ product.selected_or_first_available_variant.id }}"
+  {% unless product.selected_or_first_available_variant.available %}
+    disabled
+  {% endunless %}
+>
+  {% if product.selected_or_first_available_variant.available %}
+    Add to Cart
+  {% else %}
+    Sold Out
+  {% endif %}
+</button>
+                  </div>
+
+                </div>
+              </div>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+
+    </div>
+    <div class="load-more-wrap">
+  <button id="load-more-btn" class="anime-btn load-more-btn">
+    Load More
+  </button>
+</div>
+
+  </div>
+</section>
+
+<style>
+/* SECTION */
+.best-selling-anime-section {
+  background:#000;
+}
+.best-selling-anime-section{
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+
+.best-selling-title {
+  text-align:center;
+  font-size:32px;
+  font-weight:800;
+  color:#fff;
+  margin-bottom:40px;
+}
+
+/* GRID */
+.best-selling-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:20px;
+}
+
+@media (min-width:1024px){
+  .best-selling-grid {
+    grid-template-columns:repeat(6,1fr);
+  }
+}
+
+/* CARD */
+.anime-card {
+  background:#111;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  cursor:pointer;
+}
+
+/* IMAGE */
+.anime-card__image {
+  background:#1a1a1a;
+  padding:6px;
+  position:relative;
+}
+
+.anime-card__image img {
+  width:100%;
+  border-radius:10px;
+}
+
+/* SALE */
+.anime-badge {
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:#f5c400;
+  color:#000;
+  font-size:12px;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:4px;
+}
+.anime-badge.sale {
+  background:#f5c400;
+  color:#000;
+}
+
+.anime-badge.sold-out {
+  background:#f5c400;
+  color:#000;
+}
+
+/* CONTENT */
+.anime-card__content {
+  padding:8px;
+  display:flex;
+  flex-direction:column;
+  flex:1;
+}
+
+/* BODY */
+.anime-card__body {
+  flex:1;
+}
+
+/* TITLE */
+.anime-title {
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+  min-height:38px;
+}
+
+/* TAGS */
+.anime-pills {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:6px;
+  margin-bottom:6px;
+}
+
+.anime-pills span {
+  border:1px solid #ff9800;
+  color:#ff9800;
+  background:#000;
+  font-size:10px;
+  border-radius:20px;
+  text-align:center;
+  padding:3px;
+}
+
+.anime-rating {
+  height:16px;
+  background:#1fa750;
+  border-radius:4px;
+  display:inline-flex;
+  align-items:center;
+  padding:0 6px;
+  margin-bottom:4px;
+  width:fit-content;
+  font-size:12px;
+  line-height:1;
+}
+
+/* STAR INSIDE THE SAME PILL */
+.anime-rating::before {
+  content: "★";
+  color:#fff;
+  font-size:11px;
+  margin-right:3px;
+}
+
+.anime-rating::after {
+  content: attr(data-value);
+  color:#fff;
+  font-weight:700;
+}
+
+
+/* PRICE */
+.anime-price-row {
+  font-size:12px;
+  margin-bottom:4px;
+}
+
+.anime-discount {
+  color:#4caf50;
+  font-weight:700;
+}
+
+.anime-compare {
+  color:#fff;
+  text-decoration:line-through;
+  margin-left:6px;
+}
+
+.anime-final-price {
+  color:#ff9800;
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+/* FOOTER */
+.anime-card__footer {
+  margin-top:auto;
+}
+
+/* BUTTON */
+.anime-btn {
+  width:100%;
+  background:#ffcc16;
+  color:#000;
+  border:none;
+  padding:10px;
+  border-radius:20px;
+  font-weight:700;
+  cursor:pointer;
+}
+.load-more-wrap {
+  text-align:center;
+  margin-top:30px;
+}
+
+.load-more-btn {
+  max-width:220px;
+}
+
+
+</style>
+
+<script>
+(function(){
+  const grid = document.getElementById("anime-mixed-grid");
+  const loadMoreBtn = document.getElementById("load-more-btn");
+  if (!grid) return;
+
+  const DESKTOP_LIMIT = parseInt(grid.dataset.desktopLimit, 10) || 36;
+  const MOBILE_LIMIT = parseInt(grid.dataset.mobileLimit, 10) || 10;
+  const LIMIT = window.innerWidth < 768 ? MOBILE_LIMIT : DESKTOP_LIMIT;
+
+  //const cards = Array.from(grid.children);
+  let cards = Array.from(grid.children);
+
+/* MOVE SOLD OUT CARDS TO LAST */
+cards = cards.sort((a, b) => {
+  const aSoldOut = a.querySelector(".sold-out") ? 1 : 0;
+  const bSoldOut = b.querySelector(".sold-out") ? 1 : 0;
+  return aSoldOut - bSoldOut;
+});
+
+
+  let visibleCount = LIMIT;
+
+  grid.innerHTML = "";
+  cards.slice(0, visibleCount).forEach(card => grid.appendChild(card));
+
+  if (cards.length <= visibleCount && loadMoreBtn) {
+    loadMoreBtn.style.display = "none";
+  }
+
+  /* ⭐ FAKE RATINGS FUNCTION */
+  /*function applyFakeRatings(scope = grid) {
+    scope.querySelectorAll(".anime-rating").forEach(el => {
+      if (!el.dataset.value) {
+        el.setAttribute(
+          "data-value",
+          (Math.random() * (5 - 4.5) + 4.5).toFixed(2)
+        );
+      }
+    });
+  }*/
+
+  //applyFakeRatings(); // INITIAL LOAD
+
+  /* LOAD MORE */
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", function(){
+      const nextItems = cards.slice(visibleCount, visibleCount + LIMIT);
+      nextItems.forEach(card => grid.appendChild(card));
+      visibleCount += LIMIT;
+
+      applyFakeRatings(); // APPLY TO NEW ITEMS
+
+      if (visibleCount >= cards.length) {
+        loadMoreBtn.style.display = "none";
+      }
+    });
+  }
+
+  /* CARD CLICK → PRODUCT PAGE */
+  grid.addEventListener("click", function(e){
+    if (e.target.closest(".js-add-to-cart")) return;
+
+    const card = e.target.closest(".anime-card");
+    if (!card) return;
+
+    const url = card.dataset.url;
+    if (url) window.location.href = url;
+  });
+
+  /* ADD TO CART */
+  document.addEventListener("click", function(e){
+    const btn = e.target.closest(".js-add-to-cart");
+    if (!btn) return;
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Adding...";
+
+    fetch("/cart/add.js", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ id: btn.dataset.variant, quantity:1 })
+    })
+    .then(() => {
+      btn.textContent = "Added ✓";
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = original;
+      }, 700);
+
+      document.dispatchEvent(new Event("cart:open"));
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = original;
+    });
+  });
+})();
+</script>
+
+
+{% schema %}
+{
+  "name": "Best Selling Mixed",
+  "settings": [
+    {
+      "type": "range",
+      "id": "desktop_limit",
+      "label": "Products on Desktop",
+      "min": 6,
+      "max": 36,
+      "step": 2,
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "mobile_limit",
+      "label": "Products on Mobile",
+      "min": 2,
+      "max": 20,
+      "step": 2,
+      "default": 12
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Best Selling"
+    }
+  ]
+}
+{% endschema %}
